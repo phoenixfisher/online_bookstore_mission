@@ -1,41 +1,53 @@
+using backend.Data;
+using backend.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Add DbContext
+builder.Services.AddDbContext<BookstoreContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("BookstoreContext")));
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseCors("AllowFrontend");
+
+// Books endpoint with pagination and sorting
+app.MapGet("/api/books", async (BookstoreContext db, int page = 1, int pageSize = 5, string? sortBy = "title") =>
 {
-    app.MapOpenApi();
-}
+    var query = db.Books.AsQueryable();
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    // Sort by title or other field
+    if (sortBy?.ToLower() == "title")
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+        query = query.OrderBy(b => b.Title);
+    }
+
+    var total = await query.CountAsync();
+    var books = await query
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+
+    return new
+    {
+        books,
+        total,
+        page,
+        pageSize,
+        totalPages = (int)Math.Ceiling(total / (double)pageSize)
+    };
+})
+.WithName("GetBooks")
+.WithOpenApi();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

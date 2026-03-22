@@ -1,120 +1,150 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useState, useEffect } from 'react'
 import './App.css'
 
+interface Book {
+  id: number
+  title: string
+  author: string
+  publisher: string
+  isbn: string
+  category: string
+  pages: number
+  price: number
+}
+
+interface BooksResponse {
+  books: Book[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [books, setBooks] = useState<Book[]>([])
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(5)
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [sortBy] = useState('title')
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    fetchBooks()
+  }, [page, pageSize])
+
+  const fetchBooks = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(
+        `http://localhost:5021/api/books?page=${page}&pageSize=${pageSize}&sortBy=${sortBy}`
+      )
+      const data: BooksResponse = await response.json()
+      setBooks(data.books)
+      setTotal(data.total)
+      setTotalPages(data.totalPages)
+    } catch (error) {
+      console.error('Error fetching books:', error)
+    }
+    setLoading(false)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <div className="container mt-5">
+      <h1>Online Bookstore</h1>
+
+      <div className="mb-3">
+        <label htmlFor="pageSize" className="form-label">
+          Books per page:
+        </label>
+        <select
+          id="pageSize"
+          className="form-select w-auto"
+          value={pageSize}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value))
+            setPage(1)
+          }}
         >
-          Count is {count}
-        </button>
-      </section>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+        </select>
+      </div>
 
-      <div className="ticks"></div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <table className="table table-striped">
+            <thead className="table-dark">
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Publisher</th>
+                <th>ISBN</th>
+                <th>Category</th>
+                <th>Pages</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {books.map((book) => (
+                <tr key={book.id}>
+                  <td>{book.title}</td>
+                  <td>{book.author}</td>
+                  <td>{book.publisher}</td>
+                  <td>{book.isbn}</td>
+                  <td>{book.category}</td>
+                  <td>{book.pages}</td>
+                  <td>${book.price.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          <div className="d-flex align-items-center justify-content-between">
+            <div>
+              <p>
+                Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)} of {total} books
+              </p>
+            </div>
+            <nav>
+              <ul className="pagination">
+                <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                  >
+                    Previous
+                  </button>
+                </li>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <li key={p} className={`page-item ${page === p ? 'active' : ''}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => setPage(p)}
+                    >
+                      {p}
+                    </button>
+                  </li>
+                ))}
+                <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
