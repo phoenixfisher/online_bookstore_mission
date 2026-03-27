@@ -16,11 +16,16 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetBooks(int page = 1, int pageSize = 5)
+        public IActionResult GetBooks(int page = 1, int pageSize = 5, [FromQuery] List<string>? categories = null)
         {
-            var query = _bookstoreContext.Books
-                .OrderBy(b => b.Title)
-                .AsQueryable();
+            var query = _bookstoreContext.Books.AsQueryable();
+
+            if (categories != null && categories.Count > 0)
+            {
+                query = query.Where(b => categories.Contains(b.Category));
+            }
+
+            query = query.OrderBy(b => b.Title);
 
             var total = query.Count();
             var books = query
