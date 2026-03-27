@@ -15,7 +15,7 @@ function BookList() {
 
       try {
         const response = await fetch(
-          `http://localhost:5021/api/books?page=${page}&pageSize=${pageSize}&sortBy=title`
+          `http://localhost:5021/api/books?page=${page}&pageSize=${pageSize}`
         )
         const data: BooksResponse = await response.json()
 

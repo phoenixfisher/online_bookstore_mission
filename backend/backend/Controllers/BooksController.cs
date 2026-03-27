@@ -1,7 +1,6 @@
 using backend.Data;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers
 {
@@ -17,23 +16,17 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<BooksResponse>> GetBooks(
-            int page = 1,
-            int pageSize = 5,
-            string? sortBy = "title")
+        public IActionResult GetBooks(int page = 1, int pageSize = 5)
         {
-            var query = _bookstoreContext.Books.AsQueryable();
+            var query = _bookstoreContext.Books
+                .OrderBy(b => b.Title)
+                .AsQueryable();
 
-            if (string.Equals(sortBy, "title", StringComparison.OrdinalIgnoreCase))
-            {
-                query = query.OrderBy(b => b.Title);
-            }
-
-            var total = await query.CountAsync();
-            var books = await query
+            var total = query.Count();
+            var books = query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToList();
 
             return Ok(new BooksResponse
             {
@@ -43,6 +36,17 @@ namespace backend.Controllers
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling(total / (double)pageSize)
             });
+        }
+
+        [HttpGet("GetBookTypes")]
+        public IActionResult GetBookTypes()
+        {
+            var bookTypes = _bookstoreContext.Books
+                .Select(b => b.Category)
+                .Distinct()
+                .ToList();
+
+            return Ok(bookTypes);
         }
     }
 
