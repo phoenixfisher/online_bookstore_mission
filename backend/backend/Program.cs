@@ -1,53 +1,30 @@
 using backend.Data;
-using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApi();
+
 builder.Services.AddDbContext<BookstoreContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("BookstoreContext")));
 
-// Add CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-    });
-});
+builder.Services.AddCors();
 
 var app = builder.Build();
 
-app.UseCors("AllowFrontend");
-
-// Books endpoint with pagination and sorting
-app.MapGet("/api/books", async (BookstoreContext db, int page = 1, int pageSize = 5, string? sortBy = "title") =>
+if (app.Environment.IsDevelopment())
 {
-    var query = db.Books.AsQueryable();
+    app.MapOpenApi();
+}
 
-    // Sort by title or other field
-    if (sortBy?.ToLower() == "title")
-    {
-        query = query.OrderBy(b => b.Title);
-    }
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-    var total = await query.CountAsync();
-    var books = await query
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize)
-        .ToListAsync();
+app.UseHttpsRedirection();
 
-    return new
-    {
-        books,
-        total,
-        page,
-        pageSize,
-        totalPages = (int)Math.Ceiling(total / (double)pageSize)
-    };
-})
-.WithName("GetBooks")
-.WithOpenApi();
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
