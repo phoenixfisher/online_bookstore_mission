@@ -53,6 +53,67 @@ namespace backend.Controllers
 
             return Ok(bookTypes);
         }
+
+        [HttpPost]
+        public IActionResult CreateBook([FromBody] Book book)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _bookstoreContext.Books.Add(book);
+            _bookstoreContext.SaveChanges();
+
+            return CreatedAtAction(nameof(GetBooks), new { id = book.Id }, book);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateBook(int id, [FromBody] Book updatedBook)
+        {
+            if (id != updatedBook.Id)
+                return BadRequest("ID mismatch");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existingBook = _bookstoreContext.Books.Find(id);
+            if (existingBook == null)
+                return NotFound();
+
+            // Update properties
+            existingBook.Title = updatedBook.Title;
+            existingBook.Author = updatedBook.Author;
+            existingBook.Publisher = updatedBook.Publisher;
+            existingBook.ISBN = updatedBook.ISBN;
+            existingBook.Classification = updatedBook.Classification;
+            existingBook.Category = updatedBook.Category;
+            existingBook.Pages = updatedBook.Pages;
+            existingBook.Price = updatedBook.Price;
+
+            _bookstoreContext.SaveChanges();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteBook(int id)
+        {
+            var book = _bookstoreContext.Books.Find(id);
+            if (book == null)
+                return NotFound();
+
+            _bookstoreContext.Books.Remove(book);
+            _bookstoreContext.SaveChanges();
+            return NoContent();
+        }
+        
+        [HttpGet("{id}")]
+        public IActionResult GetBook(int id)
+        {
+            var book = _bookstoreContext.Books.Find(id);
+            if (book == null)
+                return NotFound();
+
+            return Ok(book);
+        }
     }
 
     public class BooksResponse

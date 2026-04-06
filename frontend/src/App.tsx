@@ -5,6 +5,7 @@ import BookFilter from './BookFilter'
 import CartSummary from './CartSummary'
 import CartView from './CartView'
 import type { Book, CartItem } from './types/Book'
+import BookForm from './BookForm'
 
 const CART_STORAGE_KEY = 'bookstore-cart'
 
@@ -18,6 +19,51 @@ function App() {
 
     return storedCart ? JSON.parse(storedCart) : []
   })
+  const [editingBook, setEditingBook] = useState<Book | null>(null)
+  const [showAddForm, setShowAddForm] = useState(false)
+
+  const handleSaveBook = async (book: Book) => {
+    try {
+      const isEditing = !!book.id
+      const url = isEditing ? `http://localhost:5021/api/books/${book.id}` : 'http://localhost:5021/api/books'
+
+      const response = await fetch(url, {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(book),
+      })
+
+      if (response.ok) {
+        setEditingBook(null)
+        setShowAddForm(false)
+        // Books will refresh automatically when BookList re-renders
+        window.location.reload() // Simple refresh for now
+      } else {
+        alert('Failed to save book')
+      }
+    } catch (error) {
+      console.error('Error saving book:', error)
+      alert('Failed to save book')
+    }
+  }
+
+  const handleDeleteBook = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:5021/api/books/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        // Books will refresh automatically when BookList re-renders
+        window.location.reload() // Simple refresh for now
+      } else {
+        alert('Failed to delete book')
+      }
+    } catch (error) {
+      console.error('Error deleting book:', error)
+      alert('Failed to delete book')
+    }
+  }
 
   useEffect(() => {
     sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart))
@@ -68,6 +114,23 @@ function App() {
           />
         </div>
 
+        <button onClick={() => setShowAddForm(true)}>Add New Book</button>
+      
+        {showAddForm && (
+          <BookForm 
+            onSave={handleSaveBook} 
+            onCancel={() => setShowAddForm(false)} 
+          />
+        )}
+      
+        {editingBook && (
+          <BookForm 
+            book={editingBook}
+            onSave={handleSaveBook} 
+            onCancel={() => setEditingBook(null)} 
+          />
+        )}
+
         <div className="col-12 col-lg-6">
           <BookList
             selectedCategories={selectedCategories}
@@ -76,6 +139,8 @@ function App() {
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
             onAddToCart={addToCart}
+            onEditBook={setEditingBook}
+            onDeleteBook={handleDeleteBook}
           />
         </div>
 
