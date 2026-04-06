@@ -24,25 +24,6 @@ function BookList({
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this book?')) {
-      try {
-        const response = await fetch(`http://localhost:5021/api/books/${id}`, {
-          method: 'DELETE',
-        })
-
-        if (response.ok) {
-          onDeleteBook(id)
-        } else {
-          alert('Failed to delete book')
-        }
-      } catch (error) {
-        console.error('Error deleting book:', error)
-        alert('Failed to delete book')
-      }
-    }
-  }
-
   useEffect(() => {
     const fetchBooks = async () => {
       try {

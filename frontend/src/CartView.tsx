@@ -42,8 +42,11 @@ function CartView({ cart, onUpdateQuantity, onContinueShopping }: CartViewProps)
                       </tr>
                     </thead>
                     <tbody>
-                      {cart.map((item) => (
-                        <tr key={item.book.id}>
+                      {cart.map((item) => {
+                        const bookId = item.book.id ?? 0
+
+                        return (
+                        <tr key={bookId}>
                           <td>
                             <div className="fw-semibold">{item.book.title}</div>
                             <div className="text-muted small">{item.book.author}</div>
@@ -53,14 +56,14 @@ function CartView({ cart, onUpdateQuantity, onContinueShopping }: CartViewProps)
                             <div className="btn-group" role="group" aria-label={`Quantity controls for ${item.book.title}`}>
                               <button
                                 className="btn btn-outline-secondary"
-                                onClick={() => onUpdateQuantity(item.book.id, item.quantity - 1)}
+                                onClick={() => onUpdateQuantity(bookId, item.quantity - 1)}
                               >
                                 -
                               </button>
                               <span className="btn btn-light disabled">{item.quantity}</span>
                               <button
                                 className="btn btn-outline-secondary"
-                                onClick={() => onUpdateQuantity(item.book.id, item.quantity + 1)}
+                                onClick={() => onUpdateQuantity(bookId, item.quantity + 1)}
                               >
                                 +
                               </button>
@@ -68,7 +71,8 @@ function CartView({ cart, onUpdateQuantity, onContinueShopping }: CartViewProps)
                           </td>
                           <td>${(item.book.price * item.quantity).toFixed(2)}</td>
                         </tr>
-                      ))}
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>

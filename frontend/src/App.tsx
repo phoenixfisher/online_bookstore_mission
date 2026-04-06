@@ -108,30 +108,35 @@ function App() {
     <div className="container py-4">
       <div className="row g-4 align-items-start">
         <div className="col-12 col-lg-3">
-          <BookFilter
-            selectedCategories={selectedCategories}
-            onCheckboxChange={setSelectedCategories}
-          />
+          <div className="sidebar-stack">
+            <BookFilter
+              selectedCategories={selectedCategories}
+              onCheckboxChange={setSelectedCategories}
+            />
+
+            <button
+              className="btn btn-primary w-100 shadow-sm"
+              onClick={() => setShowAddForm(true)}
+            >
+              Add New Book
+            </button>
+          </div>
         </div>
 
-        <button onClick={() => setShowAddForm(true)}>Add New Book</button>
-      
-        {showAddForm && (
-          <BookForm 
-            onSave={handleSaveBook} 
-            onCancel={() => setShowAddForm(false)} 
-          />
-        )}
-      
-        {editingBook && (
-          <BookForm 
-            book={editingBook}
-            onSave={handleSaveBook} 
-            onCancel={() => setEditingBook(null)} 
-          />
-        )}
-
         <div className="col-12 col-lg-6">
+          {(showAddForm || editingBook) && (
+            <div className="mb-4">
+              <BookForm
+                book={editingBook ?? undefined}
+                onSave={handleSaveBook}
+                onCancel={() => {
+                  setShowAddForm(false)
+                  setEditingBook(null)
+                }}
+              />
+            </div>
+          )}
+
           <BookList
             selectedCategories={selectedCategories}
             page={page}

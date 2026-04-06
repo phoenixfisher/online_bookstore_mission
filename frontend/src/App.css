@@ -1,3 +1,13 @@
+.sidebar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .summary-card {
   top: 1rem;
+}
+
+.sidebar-stack .btn {
+  border-radius: 0.75rem;
 }
