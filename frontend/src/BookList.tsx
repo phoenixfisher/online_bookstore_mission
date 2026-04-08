@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { Book, BooksResponse } from './types/Book'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5021'
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:5021' : '')
 
 function BookList({
   selectedCategories,

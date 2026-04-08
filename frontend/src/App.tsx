@@ -8,7 +8,8 @@ import type { Book, CartItem } from './types/Book'
 import BookForm from './BookForm'
 
 const CART_STORAGE_KEY = 'bookstore-cart'
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5021'
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:5021' : '')
 
 function App() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
