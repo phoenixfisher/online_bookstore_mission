@@ -15,4 +15,12 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="..\..\db\Bookstore.sqlite">
+            <Link>Bookstore.sqlite</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>

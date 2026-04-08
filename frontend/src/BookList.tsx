@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { Book, BooksResponse } from './types/Book'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5021'
+
 function BookList({
   selectedCategories,
   page,
@@ -32,7 +34,7 @@ function BookList({
           .join('&')
 
         const response = await fetch(
-          `http://localhost:5021/api/books?page=${page}&pageSize=${pageSize}${selectedCategories.length > 0 ? `&${categoryParams}` : ''}`
+          `${API_BASE_URL}/api/books?page=${page}&pageSize=${pageSize}${selectedCategories.length > 0 ? `&${categoryParams}` : ''}`
         )
         const data: BooksResponse = await response.json()
 

@@ -8,6 +8,7 @@ import type { Book, CartItem } from './types/Book'
 import BookForm from './BookForm'
 
 const CART_STORAGE_KEY = 'bookstore-cart'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5021'
 
 function App() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -25,7 +26,9 @@ function App() {
   const handleSaveBook = async (book: Book) => {
     try {
       const isEditing = !!book.id
-      const url = isEditing ? `http://localhost:5021/api/books/${book.id}` : 'http://localhost:5021/api/books'
+      const url = isEditing
+        ? `${API_BASE_URL}/api/books/${book.id}`
+        : `${API_BASE_URL}/api/books`
 
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
@@ -49,7 +52,7 @@ function App() {
 
   const handleDeleteBook = async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:5021/api/books/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/books/${id}`, {
         method: 'DELETE',
       })
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5021'
+
 function BookFilter({
   selectedCategories,
   onCheckboxChange,
@@ -12,7 +14,7 @@ function BookFilter({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:5021/api/Books/GetBookTypes')
+        const response = await fetch(`${API_BASE_URL}/api/Books/GetBookTypes`)
         const data = await response.json()
         setCategories(data)
       } catch (error) {
